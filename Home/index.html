@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-storage.js"></script>
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script> 
+    <script defer src="script.js"></script>
+    <title>MEMO / HOME</title>
+</head>
+<style>
+    @media (pointer:none), (pointer:coarse) {
+        :root {
+            --Image-height:500px;
+        }
+
+        body {
+            background:rgb(10, 10, 10);
+            padding:0;
+            margin:0px;
+            font-family: Arial, Helvetica, sans-serif;
+            height:5000px;
+            width:100vw;
+            opacity: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            
+        }
+
+        #group-Title {
+            width:calc(100vw - 50px);
+            font-size:20px;
+            font-weight:900;
+            text-transform: uppercase;
+            color:rgb(200, 200, 200);
+            position: absolute;
+            top:20px;
+            left:50%;
+            text-align: center;
+            transform:translate(-50%);
+            z-index: 15;
+        }
+
+        #img-Container {
+            width:100vw;
+            height:var(--Image-height);
+            position:fixed;
+            top:0px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            object-position: center;
+            user-select: none;
+            /* filter:saturate(0%); */
+        }
+
+        #fade {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to top, rgb(10, 10, 10) 10%, transparent);
+            position:absolute;
+            top:calc(var(--Image-height) - 50%);
+            user-select: none;
+            z-index: 2;
+        }
+
+        #fade2 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to top, rgb(10, 10, 10) 25%, transparent);
+            position:absolute;
+            top:calc(var(--Image-height) - 50%);
+            user-select: none;
+            z-index: 2;
+        }
+
+        #fade3 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to bottom, rgb(10, 10, 10), transparent);
+            position:fixed;
+            top:0px;
+            user-select: none;
+            z-index:1;
+        }
+
+        #fade4 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to bottom, rgba(10, 10, 10, 0.438), transparent);
+            position:fixed;
+            top:0px;
+            user-select: none;
+            z-index:1;
+        }
+
+        #main-Top-Fade {
+            width:100vw;
+            height:25%;
+            background:linear-gradient(to bottom, rgb(10, 10, 10), transparent);
+            position:fixed;
+            top:0px;
+            user-select: none;
+            z-index:13;
+        }
+
+        #posts-Container {
+            width:100vw;
+            height:500px;
+            background:rgb(10, 10, 10);
+            position:absolute;
+            top:calc(var(--Image-height) + 50px);
+            position:absolute;
+            margin-top: -50px;
+            padding-top:95px;
+        }
+
+        .img-Post-Container {
+            width:100vw;
+            height:fit-content;
+            margin-bottom:25px;
+        }
+
+        .posted-img-Container {
+            width:100vw;
+            height:fit-content;
+            position:relative;
+        }
+        
+        .posted-img {
+            object-position: center;
+            object-fit: cover;
+            min-height:400px;
+            max-height:650px;
+            width:100%;
+            /* filter: saturate(0%); */
+        }
+
+        .profile-Pic-Container {
+            width:50px;
+            height:50px;
+            overflow: hidden;
+            border-radius:100%;
+        }
+
+        .profile-Pic {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            object-position: center;
+        }
+
+        .post-Info {
+            color:white;
+            z-index: 1000;
+            font-size: 25px;
+            position:absolute;
+            top:-60px;
+            font-weight: 900;
+            margin-left:12.5px;
+            display:flex;
+        }
+
+        .name-Location-Container {
+            width:calc(100vw - 100px);
+            font-size:15px;
+            margin-left:10px;
+            margin-top: auto;
+            margin-bottom: auto;
+            text-align: left;
+            text-transform: capitalize;
+        }
+
+        .post-Name {
+            font-size: 20px;
+            font-weight: 900;
+            color:rgb(200, 200, 200);
+        }
+        
+        .location {
+            color:rgb(150, 150, 150);
+        }
+
+        .share-Button {
+            width:30px;
+            height:30px;
+            border-radius: 100%;
+            background:transparent;
+            border:none;
+            margin-top:auto;
+            margin-bottom: auto;
+            margin-left: -12.5px;
+        }
+
+        .edit-Icon {
+            width:20px;
+            height:20px;
+            margin-top:auto;
+            margin-bottom: auto;
+            margin-left: -12.5px;
+        }
+
+        #fade5 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to top, rgb(10, 10, 10), transparent);
+            position:absolute;
+            bottom:0px;
+            user-select: none;
+            z-index: 2;
+        }
+
+        #fade6 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to top, rgb(10, 10, 10), transparent);
+            position:absolute;
+            bottom:0px;
+            user-select: none;
+            z-index: 2;
+        }
+
+        #fade7 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to bottom, rgb(10, 10, 10), transparent);
+            position:absolute;
+            top:0px;
+            user-select: none;
+            z-index:1;
+        }
+
+        #fade8 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to bottom, rgba(10, 10, 10, 0.438), transparent);
+            position:absolute;
+            top:0px;
+            user-select: none;
+            z-index:1;
+        }
+
+        #page-Info {
+            height:fit-content;
+            position:absolute;
+            left:50%;
+            transform:translate(-50%);
+            color:white;
+            bottom:25px;
+            width:calc(100vw - 25px);
+        }
+
+        #name {
+            height:fit-content;
+            font-size:45px;
+            font-weight:1000;
+            text-transform: capitalize;
+        }
+
+        #memories-Text {
+            color:rgb(150, 150, 150);
+            font-weight:900;
+            position:absolute;
+            top:205px;
+        }
+
+        #edit-Button {
+            width:100%;
+            padding:15px 0px;
+            font-size: 20px;
+            font-weight: 700;
+            color:black;
+            border-radius: 15px;
+            border:none;
+            margin-top: 15px;
+            background:white;
+            text-transform: uppercase;
+            position:relative;
+            z-index:1000;
+        }
+
+        #Images {
+            width:100%;
+            height:100%;
+            font-size: 100px;
+            position:absolute;
+            top:0px;
+            left:0px;
+            opacity:0;
+        }
+
+        html {
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-tap-highlight-color: transparent;
+        }
+    }
+</style>
+<body onload="showBody()">
+    <div id="img-Container">
+        <img src="../images/group.jpg" id="img">
+    </div>
+    <div id="fade"></div>
+    <div id="fade2">
+        <div id="page-Info">
+            <div id="name">Riverwood Memo🏕️</div>
+            <div id="memories-Text">All Memories</div>
+            <button id="edit-Button">ADD Images<input type="file" name="file" id="Images" title="Please upload image(Jepg, Png)" accept="image/*"></button>
+        </div>
+    </div>
+    <div id="fade3"></div>
+    <div id="fade4"></div>
+    <div id="posts-Container">
+        <div class="img-Post-Container">
+            <div class="posted-img-Container">
+                <div id="fade5"></div>
+                <div id="fade6"></div>
+                <div id="fade7"></div>
+                <div id="fade8"></div>
+                <img class="posted-img" src="../images/Six.jpg">
+                <div class="post-Info">
+                    <div class="profile-Pic-Container">
+                        <img class="profile-Pic" src="../images/profile.jpg">
+                    </div>
+                    <div class="name-Location-Container">
+                        <div class="post-Name">Shara</div>
+                        <div class="location">Lindsay, On</div>
+                    </div>
+                    <button class="share-Button" onclick="shareImg('https://firebasestorage.googleapis.com/v0/b/riverwoodweek.appspot.com/o/1687988744.png?alt=media&token=ea4de1a7-3219-4610-b746-4ec49e19cbd7')">
+                        <svg class="edit-Icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="white" height="800px" width="800px" version="1.1" id="Capa_1" viewBox="0 0 32.055 32.055" xml:space="preserve">
+                            <g>
+                                <path d="M3.968,12.061C1.775,12.061,0,13.835,0,16.027c0,2.192,1.773,3.967,3.968,3.967c2.189,0,3.966-1.772,3.966-3.967   C7.934,13.835,6.157,12.061,3.968,12.061z M16.233,12.061c-2.188,0-3.968,1.773-3.968,3.965c0,2.192,1.778,3.967,3.968,3.967   s3.97-1.772,3.97-3.967C20.201,13.835,18.423,12.061,16.233,12.061z M28.09,12.061c-2.192,0-3.969,1.774-3.969,3.967   c0,2.19,1.774,3.965,3.969,3.965c2.188,0,3.965-1.772,3.965-3.965S30.278,12.061,28.09,12.061z"/>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="img-Post-Container">
+            <div class="posted-img-Container">
+                <div id="fade5"></div>
+                <div id="fade6"></div>
+                <div id="fade7"></div>
+                <div id="fade8"></div>
+                <img class="posted-img" src="../images/Five.jpg">
+                <div class="post-Info">
+                    <div class="profile-Pic-Container">
+                        <img class="profile-Pic" src="../images/One.jpg">
+                    </div>
+                    <div class="name-Location-Container">
+                        <div class="post-Name">Noah</div>
+                        <div class="location">Lindsay, On</div>
+                    </div>
+                    <button class="share-Button" onclick="shareImg('https://firebasestorage.googleapis.com/v0/b/riverwoodweek.appspot.com/o/1687988744.png?alt=media&token=ea4de1a7-3219-4610-b746-4ec49e19cbd7')">
+                        <svg class="edit-Icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="white" height="800px" width="800px" version="1.1" id="Capa_1" viewBox="0 0 32.055 32.055" xml:space="preserve">
+                            <g>
+                                <path d="M3.968,12.061C1.775,12.061,0,13.835,0,16.027c0,2.192,1.773,3.967,3.968,3.967c2.189,0,3.966-1.772,3.966-3.967   C7.934,13.835,6.157,12.061,3.968,12.061z M16.233,12.061c-2.188,0-3.968,1.773-3.968,3.965c0,2.192,1.778,3.967,3.968,3.967   s3.97-1.772,3.97-3.967C20.201,13.835,18.423,12.061,16.233,12.061z M28.09,12.061c-2.192,0-3.969,1.774-3.969,3.967   c0,2.19,1.774,3.965,3.969,3.965c2.188,0,3.965-1.772,3.965-3.965S30.278,12.061,28.09,12.061z"/>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="img-Post-Container">
+            <div class="posted-img-Container">
+                <div id="fade5"></div>
+                <div id="fade6"></div>
+                <div id="fade7"></div>
+                <div id="fade8"></div>
+                <img class="posted-img" src="../images/Two.jpg">
+                <div class="post-Info">
+                    <div class="profile-Pic-Container">
+                        <img class="profile-Pic" src="../images/Three.jpg">
+                    </div>
+                    <div class="name-Location-Container">
+                        <div class="post-Name">Devon</div>
+                        <div class="location">Lindsay, On</div>
+                    </div>
+                    
+                    <button class="share-Button" onclick="shareImg('https://firebasestorage.googleapis.com/v0/b/riverwoodweek.appspot.com/o/1687988744.png?alt=media&token=ea4de1a7-3219-4610-b746-4ec49e19cbd7')">
+                        <svg class="edit-Icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="white" height="800px" width="800px" version="1.1" id="Capa_1" viewBox="0 0 32.055 32.055" xml:space="preserve">
+                            <g>
+                                <path d="M3.968,12.061C1.775,12.061,0,13.835,0,16.027c0,2.192,1.773,3.967,3.968,3.967c2.189,0,3.966-1.772,3.966-3.967   C7.934,13.835,6.157,12.061,3.968,12.061z M16.233,12.061c-2.188,0-3.968,1.773-3.968,3.965c0,2.192,1.778,3.967,3.968,3.967   s3.97-1.772,3.97-3.967C20.201,13.835,18.423,12.061,16.233,12.061z M28.09,12.061c-2.192,0-3.969,1.774-3.969,3.967   c0,2.19,1.774,3.965,3.969,3.965c2.188,0,3.965-1.772,3.965-3.965S30.278,12.061,28.09,12.061z"/>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="main-Top-Fade"></div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+    <script> 
+        function showBody() {
+            document.querySelector("body").style.transition = ".5s"
+            document.querySelector("body").style.opacity = "1"
+            setTimeout(function() {
+                document.querySelector("body").style.transition = "0s"
+            }, 500)
+        }
+
+        var r = document.querySelector(':root');
+    
+        document.addEventListener("scroll", function() {
+            if(window.scrollY <= 500) {
+                console.log()
+                var calc = (100 - ((window.scrollY / 500) * 100)) + "%"
+                document.getElementById("img").style.height = calc
+                // r.style.setProperty('--Image-height', calc);
+            } else if(window.scrollY >= 500) {
+                document.getElementById("img").style.height = "0%"
+                // var calc = "0%"
+                // r.style.setProperty('--Image-height', calc);
+            }else if(window.scrollY >= 450) {
+                
+                document.getElementById("main-Top-Fade").style.opacity = 1
+            } else if(window.scrollY <= 0) {
+                var calc = "100%"
+                // r.style.setProperty('--Image-height', calc);
+                // document.getElementById("img").style.height = "100%"
+            }
+        })
+
+        function showBody() {
+            document.querySelector("body").style.transition = ".5s"
+            document.querySelector("body").style.opacity = "1"
+            setTimeout(function() {
+                document.querySelector("body").style.transition = "0s"
+            }, 500)
+        }
+    </script>
+</body>
+</html>

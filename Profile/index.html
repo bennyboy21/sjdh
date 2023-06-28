@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-storage.js"></script>
+    <script defer src="script.js"></script>
+    <title>Memo / PROFILE</title>
+</head>
+<style>
+    @media (pointer:none), (pointer:coarse) {
+        :root {
+            --Image-height:500px;
+        }
+
+        body {
+            background:rgb(10, 10, 10);
+            padding:0;
+            font-family: Arial, Helvetica, sans-serif;
+            height:fit-content;
+            margin:0;
+            user-select: none;
+            -webkit-user-select: none;
+            opacity: 0;
+        }
+
+        #img-Container {
+            width:100vw;
+            height:var(--Image-height);
+            position:fixed;
+            top:0px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            user-select: none;
+            /* filter:saturate(0%); */
+        }
+
+        #fade {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to top, rgb(10, 10, 10), transparent);
+            position:absolute;
+            top:calc(var(--Image-height) - 50%);
+            user-select: none;
+            z-index: 2;
+        }
+
+        #fade2 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to top, rgb(10, 10, 10), transparent);
+            position:absolute;
+            top:calc(var(--Image-height) - 50%);
+            user-select: none;
+            z-index: 2;
+        }
+
+        #fade3 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to bottom, rgb(10, 10, 10), transparent);
+            position:fixed;
+            top:0px;
+            user-select: none;
+            z-index:1;
+        }
+
+        #fade4 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to bottom, rgba(10, 10, 10, 0.438), transparent);
+            position:fixed;
+            top:0px;
+            user-select: none;
+            z-index:1;
+        }
+
+        #main-Top-Fade {
+            width:100vw;
+            height:25%;
+            background:linear-gradient(to bottom, rgb(10, 10, 10), transparent);
+            position:fixed;
+            top:0px;
+            user-select: none;
+            z-index:13;
+        }
+
+        #page-Info {
+            height:fit-content;
+            position:absolute;
+            left:50%;
+            transform:translate(-50%);
+            color:white;
+            bottom:25px;
+            width:calc(100vw - 25px);
+        }
+
+        #name {
+            height:fit-content;
+            font-size:45px;
+            font-weight:900;
+            text-transform: capitalize;
+        }
+
+        #username {
+            color:rgb(150, 150, 150);
+            font-weight:900;
+        }
+
+        #edit-Button {
+            width:100%;
+            padding:15px 0px;
+            font-size: 20px;
+            font-weight: 700;
+            color:black;
+            border-radius: 15px;
+            border:none;
+            margin-top: 15px;
+            background:white;
+            text-transform: uppercase;
+        }
+
+        #posts-Container {
+            width:calc(100vw - 50px);
+            height:fit-content;
+            background:rgb(10, 10, 10);
+            position:absolute;
+            top:calc(var(--Image-height));
+            position:absolute;
+            padding:25px;
+            margin-top: -25px;
+            border-radius: 15px;
+        }
+
+        #memories-Text {
+            color:white;
+            margin-bottom: 20px;
+            margin-left: -12.5px;
+            font-weight: 800;
+        }
+
+        #literal-Posts-Container {
+            width:fit-content;
+            height:fit-content;
+            overflow: hidden;
+            border-radius: 15px;
+            margin-left: -12.5px;
+        }
+
+        .post-Img-Container {
+            width:calc(100vw - 25px);
+            position:relative;
+            left:50%;
+            transform:translate(-50%);
+            overflow: hidden;
+            margin-bottom:5px;
+        }
+
+        .post-Img-Container:nth-last-child(1) {
+            margin-bottom:0px;
+        }
+
+        .posted-Img {
+            pointer-events: none; 
+            width:100%;
+            filter:saturate(0%);
+            scale: .9;
+        }
+
+        .posted-Img:nth-child(1) {
+            width:100%;
+            margin-bottom: 0px;
+            scale: 1.1;
+        }
+
+        .posted-Img-Fade-Top {
+            width:100%;
+            height:150px;
+            background:linear-gradient(to bottom, rgb(10, 10, 10), transparent);
+            position:absolute;
+            top:0px;
+        }
+
+        .posted-Img-Fade-Bottom {
+            width:100%;
+            height:150px;
+            background:linear-gradient(to top, rgb(10, 10, 10), transparent);
+            position:absolute;
+            bottom:0px;
+        }
+
+        .post-Img-Date {
+            width:calc(100% - 50px);
+            color:white;
+            position:absolute;
+            left:12.5px;
+            font-weight: 800;
+            color:rgba(255, 255, 255, 0.5);
+            top:12.5px;
+            font-size: 25px;
+        }
+
+        #img-Show-Container {
+            width:100vw;
+            height:auto;
+            overflow: hidden;
+            position:fixed;
+            top:0px;
+            bottom:75px;
+            left:0px;
+            opacity: 0;
+            z-index:-1;
+            display: flex;
+            align-items: center;
+        }
+
+        #img-Show-Holder {
+            width:100vw;
+            overflow: hidden;
+            height:auto;
+            position:relative;
+            top:0px;
+            bottom:75px;
+            left:50%;
+            transform:translate(-50%);
+        }
+
+        #img-Show {
+            width:100%;
+            height:100%;
+            object-fit: cover;
+            scale:1.05;
+        }
+
+        #fade5 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to top, rgb(10, 10, 10), transparent);
+            position:absolute;
+            bottom:0px;
+            user-select: none;
+            z-index: 2;
+        }
+
+        #fade6 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to top, rgb(10, 10, 10), transparent);
+            position:absolute;
+            bottom:0px;
+            user-select: none;
+            z-index: 2;
+        }
+
+        #fade7 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to bottom, rgb(10, 10, 10), transparent);
+            position:fixed;
+            top:0px;
+            user-select: none;
+            z-index:1;
+        }
+
+        #fade8 {
+            width:100vw;
+            height:50%;
+            background:linear-gradient(to bottom, rgba(10, 10, 10, 0.438), transparent);
+            position:fixed;
+            top:0px;
+            user-select: none;
+            z-index:1;
+        }
+
+        #back-Button {
+            width:calc(100vw - 50px);
+            padding:15px 0px;
+            font-size: 20px;
+            font-weight: 700;
+            color:black;
+            border-radius: 15px;
+            border:none;
+            margin-top: 15px;
+            background:white;
+            text-transform: uppercase;
+            position:fixed;
+            bottom:25px;
+            left:50%;
+            transform:translate(-50%);
+            z-index: 100;
+        }
+
+        #slide-Show-Container {
+            width:100vw;
+            height:auto;
+            position:fixed;
+            top:0px;
+            left:0px;
+            bottom:0px;
+            opacity: 0;
+            z-index:-1;
+        }
+
+        #slide-Show-Img {
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            filter: saturate(0%) brightness(80%);
+        }
+        
+        #breaker {
+            width:100px;
+            height:50px;
+            background:transparent;
+            position:relative;
+        }
+
+        #esc {
+            color:rgba(160, 160, 160, 0.9);
+            width:calc(100vw - 50px);
+            text-align: center;
+            position:fixed;
+            bottom:25px;
+            left:50%;
+            transform:translate(-50%, -50%);
+        }
+
+        #bottom-Main-Fade {
+            width:100vw;
+            height:25%;
+            background:linear-gradient(to top, rgb(10, 10, 10), transparent);
+            position:fixed;
+            bottom:0px;
+            user-select: none;
+        }
+        
+        html {
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-tap-highlight-color: transparent;
+        }
+    }
+</style>
+<body onload="showBody()">
+    
+    <div id="main-Top-Fade">
+    </div>
+    <div id="main-Container">
+        <div id="img-Container">
+            <img src="../images/profile.jpg" id="img">
+        </div>
+        <div id="fade">
+        </div>
+        <div id="fade2">
+            <div id="page-Info">
+                <div id="name">Shara</div>
+                <div id="username">@shara14</div>
+                <button id="edit-Button" onclick="editPage()">Edit</button>
+            </div>
+        </div>
+        <div id="fade3"></div>
+        <div id="fade4"></div>
+    
+        <div id="posts-Container">
+            <div id="memories-Text">MEMORIES</div>
+            <div id="literal-Posts-Container">
+                <div class="post-Img-Container" onclick="openImg(0)">
+                    <img src="../images/One.jpg" class="posted-Img">
+                </div>
+                
+                <div class="post-Img-Container" onclick="openImg(1)">
+                    <img src="../images/Two.jpg" class="posted-Img">
+                </div>
+                
+                <div class="post-Img-Container" onclick="openImg(2)">
+                    <img src="../images/Three.jpg" class="posted-Img">
+                </div>
+
+                <div class="post-Img-Container" onclick="openImg(3)">
+                    <img src="../images/Four.jpg" class="posted-Img">
+                </div>
+                
+                <div class="post-Img-Container" onclick="openImg(4)">
+                    <img src="../images/Five.jpg" class="posted-Img">
+                </div>
+
+                <div class="post-Img-Container" onclick="openImg(5)">
+                    <img src="../images/Six.jpg" class="posted-Img">
+                </div>
+            </div>
+            <div id="breaker"></div>
+        </div>
+    </div>
+    
+    <div id="img-Show-Container">
+        <button id="back-Button" onclick="closeImg()">BACK</button>
+        <div id="img-Show-Holder">
+            <div id="fade5"></div>
+            <div id="fade6"></div>
+            
+            <div id="fade7"></div>
+            <div id="fade8"></div>
+            <img src="" id="img-Show">
+        </div>
+    </div>
+
+    <div id="slide-Show-Container" onclick="closeSlideShow()">
+        <img id="slide-Show-Img" src="" onclick="closeSlideShow()">
+        <div id="bottom-Main-Fade" onclick="closeSlideShow()">
+            
+            <div id="esc" onclick="closeSlideShow()">Tap anywhere exit slideshow</div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("scroll", function() {
+            if(window.scrollY <= 500) {
+                console.log()
+                document.getElementById("img").style.height = (100 - ((window.scrollY / 500) * 100)) + "%"
+            } else if(window.scrollY >= 500) {
+                document.getElementById("img").style.height = "0%"
+            }else if(window.scrollY >= 450) {
+                
+                document.getElementById("main-Top-Fade").style.opacity = 1
+            } else if(window.scrollY <= 0) {
+                document.getElementById("img").style.height = "100%"
+            }
+        })
+    </script>
+</body>
+</html>
